@@ -81,8 +81,8 @@ int main()
     sx = vinfo.xres;
     sy = vinfo.yres; 
 
-    for (c = 0; c <100; c++){
-//   for (;;){
+//    for (c = 0; c <100; c++){
+   for (;;){
 
         color = rand();
        
