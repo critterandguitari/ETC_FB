@@ -30,7 +30,7 @@ int main()
     //Get variable screen information
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
     vinfo.grayscale=0;
-    vinfo.bits_per_pixel=32;
+    vinfo.bits_per_pixel=16;
     vinfo.yres_virtual = 1440; // shouldn't this be implied?
     ioctl(fb_fd, FBIOPUT_VSCREENINFO, &vinfo);
     ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo);
@@ -51,8 +51,6 @@ int main()
     ioctl(fb_fd, FBIOPAN_DISPLAY, &vinfo); 
 
     printf("about to draw. size x = %d, size y = %d, bpp = %d, y virtual = %d\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel, vinfo.yres_virtual);
-    printf("red offset = %d, blue offset = %d, green offset = %d \n", vinfo.red.offset, vinfo.blue.offset, vinfo.green.offset);
-    printf("alpha offset = %d, alpha length = %d \n", vinfo.transp.offset, vinfo.transp.length);
     printf("line len whatever that is %d\n", finfo.line_length);
 
     int x,y;
@@ -62,16 +60,6 @@ int main()
     printf("set\n");
     exit(0);*/
 
-    // clearem
-    for (x=0;x<vinfo.xres;x++){
-        for (y=0;y<vinfo.yres;y++)
-        {
-            long location = x * (vinfo.bits_per_pixel/8) + y * finfo.line_length;
-          //  printf("clearing %d %d\n", x, y);
-            *((uint32_t*)(fbp + location)) = y * x;//pixel_color(0xFF,0x00,0xFF, &vinfo);
-            *((uint32_t*)(bbp + location)) = rand();//pixel_color(0xFF,0x00,0xFF, &vinfo);
-        }
-    }
 
     printf("cleared bufs\n");
     int color = 0;
@@ -81,11 +69,17 @@ int main()
     sx = vinfo.xres;
     sy = vinfo.yres; 
 
-    for (c = 0; c <100; c++){
-//   for (;;){
+    for (c = 0; c <1000; c++){
+ //   for (;;){
 
         color = rand();
-       
+         for (x=0;x<vinfo.xres;x++)
+            for (y=0;y<vinfo.yres;y++)
+            {
+                long location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y+vinfo.yoffset) * finfo.line_length;
+                *((uint16_t*)(vbp + location)) = (uint16_t)y*x*(c+1);//pixel_color(0xFF,0x00,0xFF, &vinfo);
+            }
+      
 
       //  for (x=0;x<vinfo.xres;x++)
        //     for (y=0;y<vinfo.yres;y++)
@@ -101,29 +95,18 @@ int main()
                 *((uint32_t*)(vbp + location)) = color;//pixel_color(0xFF,0x00,0xFF, &vinfo);
         }*/
         // fill one h line
-/*        for (x=0;x<vinfo.xres;x++) {
-                long location = x * (vinfo.bits_per_pixel/8);
-                *((uint32_t*)(vbp + location)) = color;//pixel_color(0xFF,0x00,0xFF, &vinfo);
-        }
+    //    for (x=0;x<vinfo.xres;x++) {
+     //           long location = x * (vinfo.bits_per_pixel/8);
+      //          *((uint32_t*)(vbp + location)) = color;//pixel_color(0xFF,0x00,0xFF, &vinfo);
+       // }
         // copy to all v lines
-        for (y=1;y<vinfo.yres;y++){
-            memcpy(vbp + (finfo.line_length * y), vbp, finfo.line_length);
-        }*/
+        //for (y=1;y<vinfo.yres;y++){
+         //   memcpy(vbp + (finfo.line_length * y), vbp, finfo.line_length);
+        //}
 
 
 
    //rando rects
-        for (count = 0; count < 100; count++){
-        color = rand();
-        randox = rand() % sx;
-        randoy = rand() % sy;
-        for (x=randox;x<100+randox;x++){
-            for (y=randoy;y<100+randoy;y++){
-                long location = ((x + count) % sx) * (vinfo.bits_per_pixel/8) + (y % sy) * finfo.line_length;
-                *((uint32_t*)(vbp + location)) = color & 0x00FFFFFF;//pixel_color(0xFF,0x00,0xFF, &vinfo);
-            }
-        }
-        }
         // copy to back  
         memcpy(bbp, vbp, screensize);
 

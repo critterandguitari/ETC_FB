@@ -101,28 +101,32 @@ int main()
                 *((uint32_t*)(vbp + location)) = color;//pixel_color(0xFF,0x00,0xFF, &vinfo);
         }*/
         // fill one h line
-/*        for (x=0;x<vinfo.xres;x++) {
+        for (x=0;x<vinfo.xres;x++) {
                 long location = x * (vinfo.bits_per_pixel/8);
                 *((uint32_t*)(vbp + location)) = color;//pixel_color(0xFF,0x00,0xFF, &vinfo);
         }
         // copy to all v lines
         for (y=1;y<vinfo.yres;y++){
             memcpy(vbp + (finfo.line_length * y), vbp, finfo.line_length);
-        }*/
+        }
 
 
 
    //rando rects
         for (count = 0; count < 100; count++){
-        color = rand();
-        randox = rand() % sx;
-        randoy = rand() % sy;
-        for (x=randox;x<100+randox;x++){
-            for (y=randoy;y<100+randoy;y++){
-                long location = ((x + count) % sx) * (vinfo.bits_per_pixel/8) + (y % sy) * finfo.line_length;
-                *((uint32_t*)(vbp + location)) = color & 0x00FFFFFF;//pixel_color(0xFF,0x00,0xFF, &vinfo);
+            color = rand();
+            randox = rand() % (sx - 101);
+            randoy = rand() % (sy - 101);
+            int sourceloc;
+            for (x=randox;x<100+randox;x++){
+                long location = x * (vinfo.bits_per_pixel/8) + randoy * finfo.line_length;
+                *((uint32_t*)(vbp + location)) = color & 0x00FFFFFF;//pixel_color(0xFF,0x00,0xFF, &vinfo);      
             }
-        }
+            sourceloc =  randox * (vinfo.bits_per_pixel/8) + randoy * finfo.line_length;
+            for (y=1+randoy;y<100+randoy;y++){
+                memcpy(vbp + (y * finfo.line_length) +  randox * (vinfo.bits_per_pixel/8), vbp + sourceloc, 400);
+            }
+
         }
         // copy to back  
         memcpy(bbp, vbp, screensize);
@@ -143,7 +147,7 @@ int main()
 		bbp=tmp;
 	    
         // 30 frames a sec
-//        usleep(20000);
+        usleep(20000);
     }
 
     return 0;
